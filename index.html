@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0a101a">
+  <meta name="description" content="Wire the law of gravity. A six-room blueprint puzzle-platformer for Bezi Jam 15.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230e2431'/%3E%3Cpath d='M16 6v20m-5-15 5-5 5 5m-10 10 5 5 5-5' fill='none' stroke='%2375f1de' stroke-width='2'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="./style.css">
+  <title>Vectorwright — Gravity Systems Lab</title>
+</head>
+<body>
+  <header class="masthead">
+    <button class="brand" id="home" type="button"><span class="brand-icon" aria-hidden="true">⇅</span> VECTORWRIGHT</button>
+    <span class="mast-label">GRAVITY SYSTEMS LAB</span>
+    <button class="quiet" id="sound" type="button" aria-pressed="true">Sound on</button>
+  </header>
+  <main>
+    <section id="menu">
+      <div class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow"><span class="light"></span> BEZI JAM 15 <span class="slash">/</span> FIELD MANUAL 001</p>
+          <h1>Wire the<br><em>impossible.</em></h1>
+          <p class="lede">Gravity is only a rule until you put it on a circuit board. Assemble the machine, then walk your little courier out of six unruly test chambers.</p>
+          <button class="primary" id="continue" type="button">Begin testing <span aria-hidden="true">↗</span></button>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <div class="art-label">FIG. 01 <span>LOCAL GRAVITY VECTOR</span></div>
+          <svg viewBox="0 0 520 300" role="presentation">
+            <defs>
+              <pattern id="blue-grid" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0v20" fill="none" stroke="#274a5e" stroke-width="1"/></pattern>
+              <radialGradient id="blue-glow"><stop stop-color="#30b9b0" stop-opacity=".28"/><stop offset="1" stop-color="#30b9b0" stop-opacity="0"/></radialGradient>
+            </defs>
+            <rect x="1" y="1" width="518" height="298" fill="url(#blue-grid)" />
+            <circle cx="260" cy="150" r="142" fill="url(#blue-glow)"/>
+            <g fill="none" stroke="#477285">
+              <circle cx="260" cy="150" r="103" stroke-dasharray="3 5"/><circle cx="260" cy="150" r="83"/><circle cx="260" cy="150" r="64"/>
+              <path d="M260 23v254m-128-127h256M90 70h78l35 36m111 91 32 33h86"/>
+            </g>
+            <g fill="none" stroke="#83f7df" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M260 67v167m-20-147 20-20 20 20m-40 127 20 20 20-20"/>
+              <rect x="236" y="127" width="48" height="46" rx="11" fill="#153742"/>
+              <path d="M250 145v6m20-6v6"/>
+              <circle cx="90" cy="70" r="4"/><circle cx="432" cy="230" r="4"/>
+            </g>
+            <g fill="#9bbac9" font-family="monospace" font-size="11" letter-spacing="2">
+              <text x="45" y="55">+9.81 m/s²</text><text x="370" y="255">−9.81 m/s²</text>
+            </g>
+          </svg>
+          <div class="art-label art-bottom">PLATE A–15 <span>POLARITY: VARIABLE</span></div>
+        </div>
+      </div>
+      <div class="section-title"><h2>Test chambers</h2><span id="progress" class="eyebrow"></span></div>
+      <div class="levels" id="levels"></div>
+    </section>
+    <section id="game" hidden>
+      <div class="game-title">
+        <div><p class="eyebrow" id="chapter"></p><h1 id="level-title"></h1></div>
+        <button id="back" class="quiet" type="button">← Chambers</button>
+      </div>
+      <p id="intro" class="lede"></p>
+      <div class="workbench">
+        <section class="panel world">
+          <div class="panel-head"><h2><span class="section-index">01</span> Test chamber</h2><span class="readout" id="gravity">↓ NORMAL</span></div>
+          <div class="viewport">
+            <canvas id="world" width="840" height="400" aria-label="Platforming test chamber"></canvas>
+            <div class="overlay" id="result" hidden>
+              <div class="result-card">
+                <p class="eyebrow" id="result-tag"></p>
+                <h2 id="result-title"></h2>
+                <p id="result-text"></p>
+                <div class="button-row">
+                  <button class="primary" id="result-main" type="button"></button>
+                  <button class="quiet" id="result-build" type="button">Edit blueprint</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="world-foot"><span><kbd>←</kbd><kbd>→</kbd> / <kbd>A</kbd><kbd>D</kbd> Move</span><span><kbd>Space</kbd> Jump</span><span><kbd>F</kbd> Signal</span><span><kbd>R</kbd> Restart</span></div>
+        </section>
+        <section class="panel blueprint">
+          <div class="panel-head"><h2><span class="section-index">02</span> Blueprint</h2><span class="readout" id="mode">BUILD</span></div>
+          <div class="board" id="board">
+            <svg id="wires" aria-hidden="true"></svg>
+            <div id="nodes" class="nodes"></div>
+            <div class="empty-board" id="empty-board"><b>⌖</b><span>Place parts on the board</span></div>
+          </div>
+          <div class="bench-inner">
+            <p class="eyebrow tray-label">PARTS TRAY</p>
+            <div id="tray" class="tray"></div>
+            <p class="board-status" id="board-status" aria-live="polite"></p>
+            <div class="button-row">
+              <button class="primary" id="mode-action" type="button">Run circuit <span aria-hidden="true">▶</span></button>
+              <button class="quiet" id="restart" type="button">Restart</button>
+              <button class="quiet" id="clear" type="button">Clear</button>
+            </div>
+          </div>
+        </section>
+      </div>
+      <aside class="field-note"><span class="eyebrow"><span class="light"></span> FIELD NOTE</span><p id="tip"></p></aside>
+    </section>
+  </main>
+  <footer><span>VECTORWRIGHT <span class="slash">/</span> SYSTEMS HANDBOOK</span><span>UNREAL × BLUEPRINT</span></footer>
+  <script type="module" src="./game.js"></script>
+</body>
+</html>
