@@ -13,7 +13,7 @@ const routes = [
 ];
 
 function simulate(level, wires, route) {
-  const run = startRun(level.parts, wires);
+  const run = startRun(level, level.parts, wires);
   let lastX = -Infinity;
   for (let n = 0; n < 850 && run.status === 'running'; n++) {
     const crossed = markers => markers?.some(x => lastX < x && run.x >= x);
@@ -38,7 +38,7 @@ for (const [i, level] of LEVELS.entries()) {
 
 test('Memory Cell: the courier is safe beside a tooth but not on its tip', () => {
   const level = LEVELS[1];
-  const run = startRun(level.parts, {});
+  const run = startRun(level, level.parts, {});
   run.x = 638.5;
   run.y = 55.5;
   step(run, level, {});
@@ -49,6 +49,16 @@ test('Memory Cell: the courier is safe beside a tooth but not on its tip', () =>
   run.vy = 0;
   step(run, level, {});
   assert.equal(run.status, 'lost');
+});
+
+test('Deadman’s Field: the interlock rejects a direct wire even with a winning hold sequence', () => {
+  const level = LEVELS[2];
+  const direct = { 'flux:drive': 'hold' };
+  const manual = { input: ({ x }) => ({ hold: x >= 125 && (x < 380 || (x >= 525 && x < 705)) }) };
+  assert.equal(simulate({ ...level, requiresInterlock: false }, direct, manual).status, 'won');
+  assert.equal(simulate(level, direct, manual).status, 'lost');
+  assert.equal(simulate(level, { ...routes[2].wires, 'and:B': 'hold' }, manual).status, 'lost');
+  assert.equal(simulate(level, { ...routes[2].wires, 'and:A': 'field', 'and:B': 'hold' }, routes[2]).status, 'won');
 });
 
 test('a toggle latches only on the rising edge, and a timer expires', () => {

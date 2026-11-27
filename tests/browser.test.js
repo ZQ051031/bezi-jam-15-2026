@@ -70,6 +70,14 @@ test('browser: menu, blueprint edits, hazard and successful extraction with zero
     await checkText('#progress', '1 / 6 CLEARED');
     await page.reload();
     await checkText('#progress', '1 / 6 CLEARED');
+    await page.locator('.level-card').filter({ hasText: 'Deadman’s Field' }).click();
+    await button('Place Hold switch').click();
+    await button('Place Gravity coil').click();
+    await button('Hold switch output').click();
+    await button('Gravity coil drive input').click();
+    await button('Run circuit').click();
+    await checkText('#board-status', 'Interlock open: wire the hold switch and field sensor through the AND gate to unlock the coil.');
+    await button('← Chambers').click();
     await page.locator('.level-card').filter({ hasText: 'The Double Inversion' }).click();
     await heading('The Double Inversion').waitFor();
     assert.deepEqual(failed, []);

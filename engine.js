@@ -40,9 +40,9 @@ export const LEVELS = [
     parts: ['pulse', 'toggle', 'flux'], bottom: [[225, 440]], top: [[645, 830]], exit: 'bottom',
   },
   {
-    name: 'Deadman’s Field', chapter: 'INTERLOCK / 03', intro: 'The coil should listen to F only inside the cyan field. Neither signal is enough on its own.',
+    name: 'Deadman’s Field', chapter: 'INTERLOCK / 03', intro: 'The safety interlock only unlocks the coil when the hold switch and field sensor feed it through an AND gate.',
     tip: 'The AND gate needs both signals. Rise over the first pit; release F early to duck the overhead teeth, then rise again.',
-    parts: ['hold', 'field', 'and', 'flux'], bands: { field: [125, 705] },
+    parts: ['hold', 'field', 'and', 'flux'], bands: { field: [125, 705] }, requiresInterlock: true,
     bottom: [[245, 355], [584, 700]], top: [[458, 514], [758, 830]], exit: 'bottom',
   },
   {
@@ -65,7 +65,7 @@ export const LEVELS = [
   },
 ];
 
-export function machine(parts, wires) {
+export function machine(parts, wires, coilArmed = true) {
   const memory = Object.create(null);
   return (controls, x, bands = {}) => {
     const values = Object.create(null);
@@ -94,7 +94,7 @@ export function machine(parts, wires) {
       if (id === 'and') value = input('A') && input('B');
       if (id === 'or') value = input('A') || input('B');
       if (id === 'not') value = Boolean(wires['not:A']) && !input('A');
-      if (id === 'flux') value = input('drive');
+      if (id === 'flux') value = coilArmed && input('drive');
       values[id] = Boolean(value);
       return values[id];
     };
@@ -109,10 +109,15 @@ export function wouldCycle(wires, from, to) {
 }
 
 const SIZE = 11;
-export function startRun(parts, wires) {
+export function startRun(level, parts, wires) {
+  const gateInputs = [wires['and:A'], wires['and:B']];
+  const coilArmed = !level.requiresInterlock || (
+    ['hold', 'field', 'and'].every(part => parts.includes(part)) &&
+    wires['flux:drive'] === 'and' && gateInputs.includes('hold') && gateInputs.includes('field')
+  );
   return {
     x: 55, y: FLOOR - SIZE, vx: 0, vy: 0, gravity: 1, grounded: true,
-    face: 1, ticks: 0, status: 'running', values: {}, read: machine(parts, wires),
+    face: 1, ticks: 0, status: 'running', values: {}, coilArmed, read: machine(parts, wires, coilArmed),
   };
 }
 

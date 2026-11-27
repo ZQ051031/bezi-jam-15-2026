@@ -84,7 +84,7 @@ function showMenu() {
 }
 
 function resetRun() {
-  run = startRun(design().parts, design().wires);
+  run = startRun(current(), design().parts, design().wires);
   inputs.clear();
   pulse = jump = false;
   trail = [];
@@ -119,7 +119,8 @@ function enterRun() {
   armed = null;
   resetRun();
   renderBench();
-  note(design().wires['flux:drive'] ? 'Circuit live. Mint traces carry a high signal.' : 'No drive wire: gravity will stay normal.');
+  if (!run.coilArmed) note('Interlock open: wire the hold switch and field sensor through the AND gate to unlock the coil.');
+  else note(design().wires['flux:drive'] ? 'Circuit live. Mint traces carry a high signal.' : 'No drive wire: gravity will stay normal.');
   playTone('run');
 }
 
