@@ -2,6 +2,16 @@ export const WIDTH = 840;
 export const HEIGHT = 400;
 export const CEILING = 32;
 export const FLOOR = 368;
+export const TOOTH_HEIGHT = 15;
+
+export function* spikeTeeth(left, right) {
+  const count = Math.ceil((right - left) / 15);
+  const width = (right - left) / count;
+  for (let i = 0; i < count; i++) {
+    const x = left + i * width;
+    yield [x + 1, x + width / 2, x + width - 1];
+  }
+}
 
 export const PARTS = {
   hold:   { name: 'Hold switch', symbol: 'F', inputs: [], help: 'High while you hold F.' },
@@ -110,6 +120,18 @@ function intersects(x, y, [bx, by, width, height]) {
   return x + SIZE > bx && x - SIZE < bx + width && y + SIZE > by && y - SIZE < by + height;
 }
 
+function hitsSpikes({ x, y }, ranges, depth) {
+  const reach = 1 - Math.max(0, depth(y)) / TOOTH_HEIGHT;
+  if (reach <= 0) return false;
+  for (const [start, end] of ranges) {
+    if (x + SIZE <= start || x - SIZE >= end) continue;
+    for (const [left, tip, right] of spikeTeeth(start, end)) {
+      if (x + SIZE > tip + (left - tip) * reach && x - SIZE < tip + (right - tip) * reach) return true;
+    }
+  }
+  return false;
+}
+
 export function step(run, level, controls) {
   if (run.status !== 'running') return;
   run.ticks++;
@@ -148,9 +170,8 @@ export function step(run, level, controls) {
       run.vy = 0;
     }
   }
-  const hit = (ranges, y) => ranges.some(([left, right]) =>
-    intersects(run.x, run.y, [left + 4, y, right - left - 8, 14]));
-  if (hit(level.top, CEILING) || hit(level.bottom, FLOOR - 14)) {
+  if (hitsSpikes(run, level.top, y => y - SIZE - CEILING) ||
+      hitsSpikes(run, level.bottom, y => FLOOR - y - SIZE)) {
     run.status = 'lost';
   } else if (run.x >= 765 && (level.exit === 'top' ? run.y <= CEILING + 18 : run.y >= FLOOR - 18)) {
     run.status = 'won';

@@ -36,6 +36,21 @@ for (const [i, level] of LEVELS.entries()) {
   });
 }
 
+test('Memory Cell: the courier is safe beside a tooth but not on its tip', () => {
+  const level = LEVELS[1];
+  const run = startRun(level.parts, {});
+  run.x = 638.5;
+  run.y = 55.5;
+  step(run, level, {});
+  assert.equal(run.status, 'running');
+
+  run.x = 652;
+  run.y = 55.5;
+  run.vy = 0;
+  step(run, level, {});
+  assert.equal(run.status, 'lost');
+});
+
 test('a toggle latches only on the rising edge, and a timer expires', () => {
   const toggle = machine(['pulse', 'toggle', 'flux'], routes[1].wires);
   assert.equal(toggle({ pulse: false }, 0).flux, false);

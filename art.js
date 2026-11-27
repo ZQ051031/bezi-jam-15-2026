@@ -1,4 +1,4 @@
-import { CEILING, FLOOR, WIDTH, HEIGHT } from './engine.js';
+import { CEILING, FLOOR, WIDTH, HEIGHT, spikeTeeth, TOOTH_HEIGHT } from './engine.js';
 
 const MINT = '#81f5df';
 const AMBER = '#ffca85';
@@ -57,17 +57,15 @@ export function chamber(canvas, level) {
   for (const [ranges, top] of [[level.top, true], [level.bottom, false]]) {
     for (const [left, right] of ranges) {
       const y = top ? CEILING : FLOOR;
-      const h = top ? 15 : -15;
-      const count = Math.ceil((right - left) / 15);
-      const size = (right - left) / count;
+      const h = top ? TOOTH_HEIGHT : -TOOTH_HEIGHT;
       bg.fillStyle = '#652e40';
       bg.fillRect(left, top ? y - 8 : y, right - left, 8);
       bg.strokeStyle = ROSE;
-      for (let x = left; x < right - 1; x += size) {
+      for (const [baseLeft, tip, baseRight] of spikeTeeth(left, right)) {
         bg.beginPath();
-        bg.moveTo(x + 1, y);
-        bg.lineTo(x + size / 2, y + h);
-        bg.lineTo(x + size - 1, y);
+        bg.moveTo(baseLeft, y);
+        bg.lineTo(tip, y + h);
+        bg.lineTo(baseRight, y);
         bg.closePath();
         bg.fill();
         bg.stroke();
